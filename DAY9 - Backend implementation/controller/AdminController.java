@@ -1,29 +1,54 @@
-package com.littleinn.storytelling.controller;
+package com.vhub.v1.controller;
 
+import com.vhub.v1.model.Admin;
+import com.vhub.v1.services.AdminService;
+
+import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import com.littleinn.storytelling.service.AuthService;
-
-import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/admin/default")
-@RequiredArgsConstructor
-public class AdminController {
+@RequestMapping("/Admin")
+public class AdminController
+{
 
-    private final AuthService authService;
+    @Autowired
+    private AdminService as;
 
-    @PostMapping
-    public ResponseEntity<?> createAdmin() {
-        try {
-            return new ResponseEntity<>(authService.createAdmin(), HttpStatus.CREATED);
-        } catch (Exception e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
 
+     @GetMapping("/getAll")
+    public ResponseEntity<List<Admin>> getAllAdmin() {
+      return new ResponseEntity<>(as.getAll(),HttpStatus.OK);
+    
+    @PutMapping("/{email}")
+        public ResponseEntity<Admin> updateAdmin(@PathVariable String email, @RequestBody Admin u) {
+    List<Admin> l = as.getByEmail(email);
+     for(Admin existingAdmin  : l){
+     if (existingAdmin != null && existingAdmin.getPassword().equals(u.getPassword())) {
+        existingAdmin.setPassword(u.getNewPassword());
+         Admin updatedAdmin = as.updateAdmin(email, existingAdmin);
+         return new ResponseEntity<>(updatedAdmin, HttpStatus.OK);
+     }}
+     return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+ }
+ @PutMapping("/{email}")
+ public ResponseEntity<Admin> updateAdmin(@PathVariable String email, @RequestBody Admin u) {
+     List<Admin> admins = as.getByEmail(email);
+     if (admins.isEmpty()) {
+         return new ResponseEntity<>(HttpStatus.NOT_FOUND); // No admin found with given email
+     }
+     Admin existingAdmin = admins.get(0); // Assuming email is unique
+     if (existingAdmin.getPassword().equals(u.getPassword())) {
+         existingAdmin.setPassword(u.getNewPassword());
+         Admin updatedAdmin = as.updateAdmin(email, existingAdmin);
+        return new ResponseEntity<>(updatedAdmin, HttpStatus.OK);
+     }
+//     return new ResponseEntity<>(HttpStatus.BAD_REQUEST); // Old password is incorrect
+
+
+
+    
 }
