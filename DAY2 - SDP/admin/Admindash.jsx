@@ -1,391 +1,184 @@
 import React, { useState } from 'react';
-import { HopOff } from 'lucide-react';
-import '../admin/Admindash.css';
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
+import {
+    Activity,
+    PlusCircle,
+    Trash2,
+} from 'lucide-react';
 
-const Admindash = () => {
-  const [users, setUsers] = useState([]);
-  const [metrics, setMetrics] = useState({
-    dailyViews: 0,
-    sales: 0,
-    comments: 0,
-    earnings: 0
-  });
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filteredUsers, setFilteredUsers] = useState([]);
+const AdminDashboard = () => {
+    const [services, setServices] = useState([
+        { id: 1, title: 'Car Maintenance', completed: 150, pending: 10, description: 'Regular and preventive maintenance for all car models.' },
+        { id: 2, title: 'Parts Replacement', completed: 75, pending: 5, description: 'Genuine parts for your vehicle\'s specific needs.' },
+        { id: 3, title: 'Customer Support', completed: 200, pending: 15, description: 'Get help and support anytime, anywhere.' },
+        { id: 4, title: 'Service Customization', completed: 50, pending: 5, description: 'Customize your service plan to fit your needs.' },
+    ]);
 
-  // Function to handle search input changes
-  function handleSearchChange(event) {
-    const query = event.target.value;
-    setSearchQuery(query);
-    // Filter users based on the search query
-    setFilteredUsers(users.filter(user =>
-      user.name.toLowerCase().includes(query.toLowerCase())
-    ));
-  }
+    const [editService, setEditService] = useState(null);
+    const [newServiceTitle, setNewServiceTitle] = useState('');
+    const [newServiceCompleted, setNewServiceCompleted] = useState(0);
+    const [newServicePending, setNewServicePending] = useState(0);
+    const [newServiceDescription, setNewServiceDescription] = useState('');
 
-  // Function to add a new user
-  function addUser() {
-    const name = document.getElementById('userName').value;
-    const email = document.getElementById('userEmail').value;
+    const handleAddService = () => {
+        const newService = {
+            id: services.length + 1,
+            title: 'New Service',
+            completed: 0,
+            pending: 0,
+            description: 'Description of the new service.',
+        };
+        setServices([...services, newService]);
+    };
 
-    if (name && email) {
-      const newUser = { 
-        name, 
-        email, 
-        price: '$50', // Default price
-        payment: 'Paid', // Default payment status
-        status: 'New' // Default status
-      };
-      setUsers(prevUsers => {
-        const updatedUsers = [...prevUsers, newUser];
-        // Filter the updated list based on the search query
-        setFilteredUsers(updatedUsers.filter(user =>
-          user.name.toLowerCase().includes(searchQuery.toLowerCase())
+    const handleEditService = (service) => {
+        setEditService(service);
+        setNewServiceTitle(service.title);
+        setNewServiceCompleted(service.completed);
+        setNewServicePending(service.pending);
+        setNewServiceDescription(service.description);
+    };
+
+    const handleSaveEdit = () => {
+        setServices(services.map(service => 
+            service.id === editService.id 
+                ? { 
+                    ...service, 
+                    title: newServiceTitle, 
+                    completed: newServiceCompleted,
+                    pending: newServicePending,
+                    description: newServiceDescription 
+                  } 
+                : service
         ));
-        return updatedUsers;
-      });
-      setMetrics(prevMetrics => ({
-        ...prevMetrics,
-        dailyViews: prevMetrics.dailyViews + 1,
-        sales: prevMetrics.sales + 1,
-        comments: prevMetrics.comments + 1
-      }));
-      document.getElementById('userName').value = '';
-      document.getElementById('userEmail').value = '';
-    } else {
-      alert('Please fill in all fields.');
-    }
-  }
+        setEditService(null);
+    };
 
-  // Function to handle user actions (e.g., remove user)
-  function handleUserAction(index, action) {
-    setUsers(prevUsers => {
-      const updatedUsers = prevUsers.filter((_, i) => i !== index);
-      // Filter the updated list based on the search query
-      setFilteredUsers(updatedUsers.filter(user =>
-        user.name.toLowerCase().includes(searchQuery.toLowerCase())
-      ));
-      return updatedUsers;
-    });
-    setMetrics(prevMetrics => ({
-      ...prevMetrics,
-      comments: action === 'remove' ? prevMetrics.comments - 1 : prevMetrics.comments
-    }));
-  }
-  function updateUserList(index, action) {
-    if (action === 'edit') {
-      const newName = prompt("Enter new name:", users[index].name);
-      const newEmail = prompt("Enter new email:", users[index].email);
-  
-      if (newName && newEmail) {
-        const updatedUser = { ...users[index], name: newName, email: newEmail };
-        setUsers(prevUsers => {
-          const updatedUsers = [...prevUsers];
-          updatedUsers[index] = updatedUser;
-          // Filter the updated list based on the search query
-          setFilteredUsers(updatedUsers.filter(user =>
-            user.name.toLowerCase().includes(searchQuery.toLowerCase())
-          ));
-          return updatedUsers;
-        });
-      }
-    } else if (action === 'remove') {
-      setUsers(prevUsers => {
-        const updatedUsers = prevUsers.filter((_, i) => i !== index);
-        // Filter the updated list based on the search query
-        setFilteredUsers(updatedUsers.filter(user =>
-          user.name.toLowerCase().includes(searchQuery.toLowerCase())
-        ));
-        return updatedUsers;
-      });
-      setMetrics(prevMetrics => ({
-        ...prevMetrics,
-        comments: prevMetrics.comments - 1
-      }));
-    }
-  }
-  
+    const handleCancelEdit = () => {
+        setEditService(null);
+    };
 
-  return (
-    <>
-      <input type="checkbox" id="nav-toggle" />
-      <div className="dashboard-sidebar">
-        <div className="sidebar-header">
-          <h1>
-            <span className="fab fa-asymmetrik"></span>
-           LittleLooms<HopOff />
-          </h1>
-        </div>
+    const handleDeleteService = (serviceId) => {
+        setServices(services.filter(service => service.id !== serviceId));
+    };
 
-        <div className="sidebar-navigation">
-          <ul>
-            <li>
-              <a href="#" className="active-link">
-                <span className="fas fa-tachometer-alt"></span>
-                <span>Dashboard</span>
-              </a>
-            </li>
-            <li>
-              <a href="#">
-                <span className="fas fa-users"></span>
-                <span>Customers</span>
-              </a>
-            </li>
-            <li>
-              <a href="#">
-                <span className="fas fa-stream"></span>
-                <span>Projects</span>
-              </a>
-            </li>
-            <li>
-              <a href="#">
-                <span className="fas fa-shopping-cart"></span>
-                <span>Orders</span>
-              </a>
-            </li>
-            <li>
-              <a href="#">
-                <span className="fas fa-boxes"></span>
-                <span>Inventory</span>
-              </a>
-            </li>
-            <li>
-              <a href="#">
-                <span className="fas fa-user-circle"></span>
-                <span>Accounts</span>
-              </a>
-            </li>
-            <li>
-              <a href="#">
-                <span className="fas fa-tasks"></span>
-                <span>Task</span>
-              </a>
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      <div className="content-area">
-        <header>
-          <h2>
-            <label htmlFor="nav-toggle">
-              <span className="fas fa-bars"></span>
-            </label>
-            Dashboard
-          </h2>
-
-          <div className="search-container">
-            <span className="fas fa-search"></span>
-            <input type="search" placeholder="Search..." value={searchQuery} onChange={handleSearchChange} />
-          </div>
-
-          <div className="user-info">
-            <img src="https://bit.ly/3bvT89p" width="40" height="40" alt="profile-img" />
-            <div>
-              <h4>Shri</h4>
-              <small>Super Admin</small>
+    return (
+        <div className="p-4">
+            <div className="flex justify-end mb-4">
+                <button 
+                    onClick={handleAddService} 
+                    className="flex items-center bg-green-500 text-white p-2 rounded"
+                >
+                    <PlusCircle className="h-6 w-6 mr-2" />
+                    Add New Service
+                </button>
             </div>
-          </div>
-        </header>
 
-        <main>
-          <div className="info-cards">
-            <div className="info-card">
-              <div>
-                <h1>{metrics.dailyViews}</h1>
-                <span>Daily Views</span>
-              </div>
-              <div>
-                <span className="fas fa-eye"></span>
-              </div>
-            </div>
-            <div className="info-card">
-              <div>
-                <h1>{metrics.sales}</h1>
-                <span>Sales</span>
-              </div>
-              <div>
-                <span className="fas fa-dollar-sign"></span>
-              </div>
-            </div>
-            <div className="info-card">
-              <div>
-                <h1>{metrics.comments}</h1>
-                <span>Comments</span>
-              </div>
-              <div>
-                <span className="fas fa-comments"></span>
-              </div>
-            </div>
-            <div className="info-card">
-              <div>
-                <h1>{metrics.earnings}</h1>
-                <span>Earnings</span>
-              </div>
-              <div>
-                <span className="fas fa-wallet"></span>
-              </div>
-            </div>
-          </div>
-
-          <div className="recent-activity">
-            <div className="projects-section">
-              <div className="card-container">
-                <div className="card-header">
-                  <h2>Recent Orders</h2>
-                  <button>
-                    See all <span className="fas fa-arrow-right"></span>
-                  </button>
-                </div>
-                <div className="card-content">
-                  <div className="table-container">
-                    <table width="100%">
-                      <thead>
-                        <tr>
-                          <td>Title</td>
-                          <td>Book Type</td>
-                          <td>Status</td>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {/* Existing project rows */}
-                        <tr>
-                          <td>Website</td>
-                          <td>Frontend</td>
-                          <td>
-                            <span className="status-indicator purple"></span>
-                            Review
-                          </td>
-                        </tr>
-                        {/* Add more project rows as needed */}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="customers-section">
-              <div className="card-container">
-                <div className="card-header">
-                  <h2>New Customers</h2>
-                  <button>
-                    See all <span className="fas fa-arrow-right"></span>
-                  </button>
-                </div>
-                <div className="card-content">
-                  {[...Array(7)].map((_, i) => (
-                    <div className="customer-item" key={i}>
-                      <div className="customer-details">
-                        <img src="https://bit.ly/3bvT89p" height="40" width="40" alt="customer" />
-                        <div>
-                          {/* <h4>Malik Abushabab</h4> */}
-                          {/* <small>CEO</small> */}
-                        </div>
-                      </div>
-                      <div className="customer-actions">
-                        <span className="fas fa-user-circle"></span>
-                        <span className="fas fa-comment"></span>
-                        <span className="fas fa-phone-alt"></span>
-                      </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"> 
+                {services.map(service => (
+                    <div key={service.id}>
+                        <Card className='border border-primary hover:shadow-lg transition-shadow duration-300'>
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium">
+                                    {service.title}
+                                </CardTitle>
+                                <Activity className="h-6 w-6 text-primary" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold">{service.completed + service.pending}</div>
+                                <div className="text-lg font-semibold mt-2">Completed: {service.completed}</div>
+                                <div className="text-lg font-semibold">Pending: {service.pending}</div>
+                                <div className="flex space-x-2 mt-2">
+                                    <button
+                                        className="flex-1 bg-blue-500 text-white p-2 rounded"
+                                        onClick={() => handleEditService(service)}
+                                    >
+                                        Edit
+                                    </button>
+                                    <button
+                                        className="flex-1 bg-red-500 text-white p-2 rounded"
+                                        onClick={() => handleDeleteService(service.id)}
+                                    >
+                                        <Trash2 className="h-5 w-5 mx-auto" />
+                                    </button>
+                                </div>
+                            </CardContent>
+                        </Card>
                     </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
+                ))}
 
-          {/* User Management Section */}
-          <div className="userManagement">
-            <div className="card-header">
-              <h2>Manage Users</h2>
+                {editService && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                        <div className="bg-white p-4 rounded">
+                            <h2 className="text-xl mb-4">Edit Service</h2>
+                            <div className="mb-4">
+                                <label className="block mb-1">Title</label>
+                                <input 
+                                    type="text" 
+                                    className="w-full border p-2"
+                                    value={newServiceTitle}
+                                    onChange={(e) => setNewServiceTitle(e.target.value)}
+                                />
+                            </div>
+                            <div className="mb-4">
+                                <label className="block mb-1">Total Number</label>
+                                <input 
+                                    type="number" 
+                                    className="w-full border p-2"
+                                    value={newServiceCompleted + newServicePending}
+                                    disabled
+                                />
+                            </div>
+                            <div className="mb-4">
+                                <label className="block mb-1">Completed</label>
+                                <input 
+                                    type="number" 
+                                    className="w-full border p-2"
+                                    value={newServiceCompleted}
+                                    onChange={(e) => setNewServiceCompleted(parseInt(e.target.value))}
+                                />
+                            </div>
+                            <div className="mb-4">
+                                <label className="block mb-1">Pending</label>
+                                <input 
+                                    type="number" 
+                                    className="w-full border p-2"
+                                    value={newServicePending}
+                                    onChange={(e) => setNewServicePending(parseInt(e.target.value))}
+                                />
+                            </div>
+                            <div className="mb-4">
+                                <label className="block mb-1">Description</label>
+                                <input 
+                                    type="text" 
+                                    className="w-full border p-2"
+                                    value={newServiceDescription}
+                                    onChange={(e) => setNewServiceDescription(e.target.value)}
+                                />
+                            </div>
+                            <button 
+                                className="bg-blue-500 text-white p-2 rounded mr-2"
+                                onClick={handleSaveEdit}
+                            >
+                                Save
+                            </button>
+                            <button 
+                                className="bg-gray-500 text-white p-2 rounded"
+                                onClick={handleCancelEdit}
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
-            <div className="form">
-              <input type="text" id="userName" placeholder="Name" />
-              <input type="email" id="userEmail" placeholder="Email" />
-              <button onClick={addUser}>Add User</button>
-            </div>
-            <div className="table-container">
-              <table width="100%">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Price</th>
-                    <th>Payment</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredUsers.map((user, index) => (
-                    <tr key={index}>
-                      <td>{user.name}</td>
-                      <td>{user.email}</td>
-                      <td>{user.price}</td>
-                      <td>{user.payment}</td>
-                      <td>{user.status}</td>
-                      <td>
-                        <button onClick={() => handleUserAction(index, 'remove')}>Remove</button>
-                        <br></br>
-                        <br></br>
-                        <button onClick={() => updateUserList(index, 'edit')}>Edit</button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+        </div>
+    );
+};
 
-          
-          <div className="userManagement">
-            <div className="card-header">
-              <h2>Manage Orders</h2>
-            </div>
-            <div className="form">
-              <input type="text" id="userName" placeholder="Item" />
-              <input type="email" id="userEmail" placeholder="Order no" />
-              <button onClick={addUser}>Add User</button>
-            </div>
-            <div className="table-container">
-              <table width="100%">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Price</th>
-                    <th>Payment</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredUsers.map((user, index) => (
-                    <tr key={index}>
-                      <td>{user.name}</td>
-                      <td>{user.email}</td>
-                      <td>{user.price}</td>
-                      <td>{user.payment}</td>
-                      <td>{user.status}</td>
-                      <td>
-                        <button onClick={() => handleUserAction(index, 'remove')}>Remove</button>
-                        <br></br>
-                        <br></br>
-                        <button onClick={() => updateUserList(index, 'edit')}>Edit</button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </main>
-      </div>
-    </>
-  );
-}
-
-export default Admindash;
-
-
-
+export default AdminDashboard;
