@@ -1,5 +1,4 @@
-package com.littleinn.storytelling.auth;
-
+package com.cs219.moto.dto.request;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
