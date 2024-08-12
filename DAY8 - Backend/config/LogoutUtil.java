@@ -1,4 +1,4 @@
-package com.littleinn.storytelling.config;
+package com.cs219.moto.config;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
