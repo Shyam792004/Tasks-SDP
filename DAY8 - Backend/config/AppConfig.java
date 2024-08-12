@@ -1,4 +1,4 @@
-package com.littleinn.storytelling.config;
+package com.cs219.moto.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
